@@ -1,0 +1,26 @@
+Machine:   Type: Laptop System: Acer product: Aspire V5-572G v: V2.10 serial: <filter> 
+           Mobo: Acer model: Dazzle_CX v: Type2 - A01 Board Version serial: <filter> UEFI: Insyde 
+           v: 2.10 date: 10/22/2013 
+CPU:       Topology: Dual Core model: Intel Core i7-3537U bits: 64 type: MT MCP L2 cache: 4096 KiB 
+           Speed: 2675 MHz min/max: 800/3100 MHz Core speeds (MHz): 1: 2683 2: 2780 3: 2703 
+           4: 2839 
+Graphics:  Device-1: Intel 3rd Gen Core processor Graphics driver: i915 v: kernel 
+           Device-2: NVIDIA GK107M [GeForce GT 750M] driver: nouveau v: kernel 
+           Display: x11 server: X.Org 1.19.6 driver: modesetting,nouveau unloaded: fbdev,vesa 
+           resolution: 1366x768~60Hz 
+           OpenGL: renderer: Mesa DRI Intel Ivybridge Mobile v: 4.2 Mesa 18.2.8 
+Audio:     Device-1: Intel 7 Series/C216 Family High Definition Audio driver: snd_hda_intel 
+           Sound Server: ALSA v: k4.15.0-50-generic 
+Network:   Device-1: Qualcomm Atheros AR9462 Wireless Network Adapter driver: ath9k 
+           Device-2: Realtek RTL8111/8168/8411 PCI Express Gigabit Ethernet driver: r8169 
+Drives:    Local Storage: total: 238.61 GiB used: 21.76 GiB (9.1%) 
+           ID-1: /dev/sda vendor: Crucial model: CT240BX500SSD1 size: 223.57 GiB 
+           ID-2: /dev/sdb type: USB vendor: Generic model: USB Flash Disk size: 15.04 GiB 
+USB:       Hub: 1-0:1 info: Full speed (or root) Hub ports: 2 rev: 2.0 
+           Hub: 1-1:2 info: Intel Integrated Rate Matching Hub ports: 6 rev: 2.0 
+           Device-1: 1-1.1:3 info: Chicony type: Video rev: 2.0 
+           Hub: 2-0:1 info: Full speed (or root) Hub ports: 2 rev: 2.0 
+           Hub: 2-1:2 info: Intel Integrated Rate Matching Hub ports: 8 rev: 2.0 
+           Hub: 3-0:1 info: Full speed (or root) Hub ports: 4 rev: 2.0 
+           Device-2: 3-2:2 info: Power Quotient type: Mass Storage rev: 2.0 
+           Hub: 4-0:1 info: Full speed (or root) Hub ports: 4 rev: 3.0 

@@ -1,0 +1,7 @@
+<RCC>
+    <qresource prefix="/actions">
+        <file alias="whitelist">images/check-mark-white-on-black-circular-background_icon-icons.com_70768.png</file>
+        <file alias="blacklist">images/cross-black-circular-button_icon-icons.com_73054.png</file>
+        <file alias="exit">images/signout_106525.png</file>
+    </qresource>
+</RCC>
