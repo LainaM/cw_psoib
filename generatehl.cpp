@@ -4,6 +4,7 @@
 #include <QProcess>
 #include <QRegularExpression>
 #include <QRegularExpressionMatch>
+#include <QDir>
 
 struct Hardware{
     QString cpu;
@@ -29,14 +30,15 @@ void HardwareList::Generate()
     }
 
     QString output;
-    if (process.readAllStandardError().size() != 0) {
-        qDebug() << process.readAllStandardError();
+    QString error = process.readAllStandardError();
+    if (!error.isEmpty()) {
         qDebug() << "Ошибка";
+        qDebug() << error;
+        qDebug() << process.readAllStandardOutput();
     }
 
     output = process.readAllStandardOutput();
 
-    qDebug() << "Start";
     Hardware hardware;
 
     QRegularExpression reg_cpu("model: (?<cpu>[^>]+) bits");
@@ -79,10 +81,9 @@ void HardwareList::Generate()
         qDebug() << "Matched USB" << hardware.usb;
     }
 
-    QFile hardlist("/home/sunny/Applications/Qt/course_work/resources/hardlist.txt");
+    QFile hardlist(QDir::homePath() + "/.hardlist.txt");
     hardlist.open(QIODevice::WriteOnly);
     QTextStream hardliststream(&hardlist);
     hardliststream << output;
     hardlist.close();
-
 }
