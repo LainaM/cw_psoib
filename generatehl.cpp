@@ -13,24 +13,25 @@
 struct Hardware{
     QString cpu;
     QStringList gpu;
-    QString audio;
+    QStringList audio;
     QStringList usb;
 
     QString to_string(){
         QString text;
-        text = cpu + "\n" + audio + "\n";
-        text += gpu.join("\n");
-        text += usb.join("\n");
+        text = cpu + "\n";
+        text += audio.join("\n");
+//        text += gpu.join("\n");
+//        text += usb.join("\n");
         return text;
     }
     QJsonObject toJson() const {
         return {
             {"cpu", cpu},
             {"gpu", QJsonArray::fromStringList(gpu)},
-            {"audio", audio},
+            {"audio", QJsonArray::fromStringList(audio)},
             {"usb", QJsonArray::fromStringList(usb)}
         };
-    };
+    }
 };
 
 
@@ -45,7 +46,6 @@ void HardwareList::Generate()
         return;
     }
 
-    QString output;
     QString error = process.readAllStandardError();
     if (!error.isEmpty()) {
         qDebug() << "Ошибка";
@@ -53,7 +53,8 @@ void HardwareList::Generate()
         qDebug() << process.readAllStandardOutput();
     }
 
-    output = process.readAllStandardOutput();
+    QString output = process.readAllStandardOutput();
+//    qDebug().noquote() << output << "\n\n";
 
     Hardware hardware;
 
@@ -63,22 +64,26 @@ void HardwareList::Generate()
         hardware.cpu = match_cpu.captured("cpu");
     }
 
-    QRegularExpression reg_gpu1("Device\\-1: (?<graphics>[^>]+) Graphics");
+    QRegularExpression reg_gpu1("Device\\-[1,2]: (?<graphics>[^>]+) driver: ");
     QRegularExpressionMatch match_gpu1 = reg_gpu1.match(output);
     if (match_gpu1.hasMatch()) {
         hardware.gpu.append(match_gpu1.captured("graphics"));
+//        hardware.gpu.append(match_gpu1.captured(1));
     }
 
-    QRegularExpression reg_gpu2("Device\\-2: (?<graphics>[^>]+)]");
-    QRegularExpressionMatch match_gpu2 = reg_gpu2.match(output);
-    if (match_gpu2.hasMatch()) {
-        hardware.gpu.append(match_gpu2.captured("graphics"));
-    }
+//    QRegularExpression reg_gpu2("Device\\-2: (?<graphics>[^>]+)]");
+//    QRegularExpressionMatch match_gpu2 = reg_gpu2.match(output);
+//    if (match_gpu2.hasMatch()) {
+//        hardware.gpu.append(match_gpu2.captured("graphics"));
+//    }
 
-    QRegularExpression reg_audio("Device\\-1: (?<audio>[^>]+) Audio driver:");
-    QRegularExpressionMatch match_audio = reg_audio.match(output);
-    if (match_audio.hasMatch()) {
-        hardware.audio = match_audio.captured("audio");
+    QStringRef audio_text = output.midRef(output.indexOf("Audio:"));
+    audio_text = audio_text.left(audio_text.indexOf("Network:"));
+    while (!audio_text.isEmpty() && audio_text.contains("Device")){
+        QStringRef device = audio_text.mid(audio_text.indexOf("Device-") + 10);
+        device = device.left(device.indexOf("driver:"));
+        hardware.audio.append(device.toString());
+        audio_text = audio_text.mid(audio_text.indexOf(" \n") + 1);
     }
 
 //    QRegularExpression reg_usb("Device\\-[\\d]: (?<hub>[^>]+)");
