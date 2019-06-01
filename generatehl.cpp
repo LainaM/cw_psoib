@@ -18,10 +18,10 @@ struct Hardware{
 
     QString to_string(){
         QString text;
-        text = cpu + "\n";
-        text += audio.join("\n");
-//        text += gpu.join("\n");
-//        text += usb.join("\n");
+        text = "CPU:\t" + cpu + "\n";
+        text += "AUDIO:\t" + audio.join("\n\t") + "\n";
+//        text += gpu.join("\n\t") + "\n";
+        text += "USB:\t" + usb.join("\n\t");
         return text;
     }
     QJsonObject toJson() const {
@@ -64,33 +64,24 @@ void HardwareList::Generate()
         hardware.cpu = match_cpu.captured("cpu");
     }
 
-    QRegularExpression reg_gpu1("Device\\-[1,2]: (?<graphics>[^>]+) driver: ");
-    QRegularExpressionMatch match_gpu1 = reg_gpu1.match(output);
-    if (match_gpu1.hasMatch()) {
-        hardware.gpu.append(match_gpu1.captured("graphics"));
-//        hardware.gpu.append(match_gpu1.captured(1));
-    }
-
-//    QRegularExpression reg_gpu2("Device\\-2: (?<graphics>[^>]+)]");
-//    QRegularExpressionMatch match_gpu2 = reg_gpu2.match(output);
-//    if (match_gpu2.hasMatch()) {
-//        hardware.gpu.append(match_gpu2.captured("graphics"));
-//    }
-
     QStringRef audio_text = output.midRef(output.indexOf("Audio:"));
     audio_text = audio_text.left(audio_text.indexOf("Network:"));
     while (!audio_text.isEmpty() && audio_text.contains("Device")){
         QStringRef device = audio_text.mid(audio_text.indexOf("Device-") + 10);
+        audio_text = device.mid(device.indexOf(" \n") + 1);
         device = device.left(device.indexOf("driver:"));
         hardware.audio.append(device.toString());
-        audio_text = audio_text.mid(audio_text.indexOf(" \n") + 1);
     }
 
-//    QRegularExpression reg_usb("Device\\-[\\d]: (?<hub>[^>]+)");
-//    QRegularExpressionMatch match_usb = reg_usb.match(output);
-//    if (match_usb.hasMatch()) {
-//        hardware.usb.append(match_usb.captured("hub"));
-//    }
+    QStringRef usb_text = output.midRef(output.indexOf("USB:"));
+    while (!usb_text.isEmpty() && usb_text.contains("Device")){
+        QStringRef device = usb_text.mid(usb_text.indexOf("Device-") + 10);
+        usb_text = device.mid(device.indexOf(" \n") + 1);
+        device = device.mid(device.indexOf("info: ") + 6);
+        device = device.left(device.indexOf("type:"));
+        hardware.usb.append(device.toString());
+    }
+
 
     qDebug().noquote() << hardware.to_string();
 
