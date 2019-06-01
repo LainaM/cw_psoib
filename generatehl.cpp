@@ -5,18 +5,34 @@
 #include <QRegularExpression>
 #include <QRegularExpressionMatch>
 #include <QDir>
+#include <QJsonDocument>
+#include <QJsonObject>
+#include <QJsonArray>
+
 
 struct Hardware{
     QString cpu;
-    QString gpu1;
-    QString gpu2;
+    QStringList gpu;
     QString audio;
     QStringList usb;
 
     QString to_string(){
-        return cpu + "\n" + gpu1 + "\n" + "\n" + gpu2 + "]" + "\n" + audio + "\n";
+        QString text;
+        text = cpu + "\n" + audio + "\n";
+        text += gpu.join("\n");
+        text += usb.join("\n");
+        return text;
     }
+    QJsonObject toJson() const {
+        return {
+            {"cpu", cpu},
+            {"gpu", QJsonArray::fromStringList(gpu)},
+            {"audio", audio},
+            {"usb", QJsonArray::fromStringList(usb)}
+        };
+    };
 };
+
 
 void HardwareList::Generate()
 {
@@ -43,47 +59,39 @@ void HardwareList::Generate()
 
     QRegularExpression reg_cpu("model: (?<cpu>[^>]+) bits");
     QRegularExpressionMatch match_cpu = reg_cpu.match(output);
-    qDebug() << "Yes match:" << match_cpu.hasMatch();
     if (match_cpu.hasMatch()) {
         hardware.cpu = match_cpu.captured("cpu");
-        qDebug() << "Matched CPU" << hardware.cpu;
     }
 
     QRegularExpression reg_gpu1("Device\\-1: (?<graphics>[^>]+) Graphics");
     QRegularExpressionMatch match_gpu1 = reg_gpu1.match(output);
-    qDebug() << "Yes match" << match_gpu1.hasMatch();
     if (match_gpu1.hasMatch()) {
-        hardware.gpu1 = match_gpu1.captured("graphics");
-        qDebug() << "Matched GPU1" << hardware.gpu1;
+        hardware.gpu.append(match_gpu1.captured("graphics"));
     }
 
     QRegularExpression reg_gpu2("Device\\-2: (?<graphics>[^>]+)]");
     QRegularExpressionMatch match_gpu2 = reg_gpu2.match(output);
-    qDebug() << "Yes match" << match_gpu2.hasMatch();
     if (match_gpu2.hasMatch()) {
-        hardware.gpu2 = match_gpu2.captured("graphics");
-        qDebug() << "Matched GPU2" << hardware.gpu2;
+        hardware.gpu.append(match_gpu2.captured("graphics"));
     }
 
     QRegularExpression reg_audio("Device\\-1: (?<audio>[^>]+) Audio driver:");
     QRegularExpressionMatch match_audio = reg_audio.match(output);
-    qDebug() << "Yes match:" << match_audio.hasMatch();
     if (match_audio.hasMatch()) {
         hardware.audio = match_audio.captured("audio");
-        qDebug() << "Matched Audio" << hardware.audio;
     }
 
-    QRegularExpression reg_usb("Device\\-[\\d]: (?<hub>[^>]+)");
-    QRegularExpressionMatch match_usb = reg_usb.match(output);
-    qDebug() << "Yes match" << match_usb.hasMatch();
-    if (match_usb.hasMatch()) {
-        hardware.usb.append(match_usb.captured("hub"));
-        qDebug() << "Matched USB" << hardware.usb;
-    }
+//    QRegularExpression reg_usb("Device\\-[\\d]: (?<hub>[^>]+)");
+//    QRegularExpressionMatch match_usb = reg_usb.match(output);
+//    if (match_usb.hasMatch()) {
+//        hardware.usb.append(match_usb.captured("hub"));
+//    }
+
+    qDebug().noquote() << hardware.to_string();
 
     QFile hardlist(QDir::homePath() + "/.hardlist.txt");
     hardlist.open(QIODevice::WriteOnly);
     QTextStream hardliststream(&hardlist);
-    hardliststream << output;
+    hardliststream << QJsonDocument(hardware.toJson()).toJson();
     hardlist.close();
 }
