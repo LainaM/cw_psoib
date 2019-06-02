@@ -19,12 +19,15 @@ struct Hardware{
     QString to_string();
     QJsonObject toJson() const;
     void save();
+
+    bool operator==(const Hardware& rhs);
 };
 
 class HardwareList {
 public:
     static bool get_current(Hardware &hardware);
-    static void Parse();
+    static Hardware fromJson(const QString &text);
+    static Hardware load();
 private:
 
 };
