@@ -1,6 +1,7 @@
 #include "hardware.h"
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
+#include <QDir>
 #include <QFile>
 #include <QString>
 #include <QTextStream>
@@ -32,4 +33,16 @@ void MainWindow::on_configButton_clicked()
    }
 
    hardware.save();
+
+   QFile hardlist(QDir::homePath() + "/.hardlist.txt");
+   if ((hardlist.exists()) && (hardlist.open(QIODevice::ReadOnly))){
+       QString str = "";
+       while (!hardlist.atEnd()){
+           str = str + hardlist.readLine();
+       }
+
+       ui->listWidget->addItems(str.split("\n"));
+
+   }
+
 }
