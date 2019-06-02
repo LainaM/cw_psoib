@@ -41,6 +41,15 @@ struct Hardware{
     }
 };
 
+bool operator==(const Hardware& lhs, const Hardware& rhs){
+    return lhs.cpu == rhs.cpu &&
+           lhs.gpu == rhs.gpu &&
+           lhs.audio == rhs.audio &&
+           lhs.network == rhs.network &&
+           lhs.drive == rhs.drive &&
+           lhs.usb == rhs.usb;
+}
+
 
 void HardwareList::Generate()
 {
@@ -99,12 +108,13 @@ void HardwareList::Generate()
     }
 
     QStringRef drive_text = output.midRef(output.indexOf("Drives:"));
+    drive_text = drive_text.left(drive_text.indexOf("USB:"));
     while (!drive_text.isEmpty() && drive_text.contains("ID")){
         QStringRef device = drive_text.mid(drive_text.indexOf("ID-") + 10);
         drive_text = device.mid(device.indexOf(" \n") + 1);
         device = device.mid(device.indexOf("vendor: ") + 8);
         device = device.left(device.indexOf("size:"));
-        hardware.drive.append(device.toString());
+        hardware.drive.append(device.toString().replace(" model:", ""));
     }
 
     QStringRef usb_text = output.midRef(output.indexOf("USB:"));
