@@ -5,6 +5,8 @@
 #include <QRegularExpression>
 #include <QRegularExpressionMatch>
 #include <QDir>
+#include <QException>
+#include <stdexcept>
 
 
 bool HardwareList::get_current(Hardware &hardware)
@@ -82,7 +84,7 @@ bool HardwareList::get_current(Hardware &hardware)
     }
 
 
-    qDebug().noquote() << hardware.to_string();
+//    qDebug().noquote() << hardware.to_string();
     return true;
 }
 
@@ -109,20 +111,61 @@ QJsonObject Hardware::toJson() const {
     };
 }
 
+Hardware HardwareList::fromJson(const QString &text) {
+    QJsonObject json = QJsonDocument::fromJson(text.toUtf8()).object();
+    Hardware hardware;
+    hardware.cpu = json["cpu"].toString();
+    for (auto item: json["audio"].toArray()){
+        hardware.audio.append(item.toString());
+    }
+    for (auto item: json["gpu"].toArray()){
+        hardware.gpu.append(item.toString());
+    }
+    for (auto item: json["drive"].toArray()){
+        hardware.drive.append(item.toString());
+    }
+    for (auto item: json["network"].toArray()){
+        hardware.network.append(item.toString());
+    }
+    for (auto item: json["usb"].toArray()){
+        hardware.usb.append(item.toString());
+    }
+    return hardware;
+}
+
+
 void Hardware::save()
 {
     QFile hardlist(QDir::homePath() + "/.hardlist.txt");
-    hardlist.open(QIODevice::WriteOnly);
+    if(!hardlist.open(QIODevice::WriteOnly)){
+        throw std::runtime_error("Cant save in hardlist.txt");
+    }
     QTextStream hardliststream(&hardlist);
     hardliststream << QJsonDocument(this->toJson()).toJson();
     hardlist.close();
 }
 
-bool operator==(const Hardware& lhs, const Hardware& rhs){
-    return lhs.cpu == rhs.cpu &&
-           lhs.gpu == rhs.gpu &&
-           lhs.audio == rhs.audio &&
-           lhs.network == rhs.network &&
-           lhs.drive == rhs.drive &&
-           lhs.usb == rhs.usb;
+
+Hardware HardwareList::load()
+{
+    QFile hardlist(QDir::homePath() + "/.hardlist.txt");
+    if (!hardlist.open(QIODevice::ReadOnly | QIODevice::Text)){
+        throw std::runtime_error("Cant open hardlist.txt");
+    }
+    QTextStream text(&hardlist);
+    Hardware hardware = HardwareList::fromJson(text.readAll());
+    hardlist.close();
+    return hardware;
 }
+
+
+bool Hardware::operator==(const Hardware& rhs){
+    return cpu == rhs.cpu &&
+           gpu == rhs.gpu &&
+           audio == rhs.audio &&
+           network == rhs.network &&
+           drive == rhs.drive &&
+           usb == rhs.usb;
+}
+
+
