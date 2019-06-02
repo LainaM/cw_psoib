@@ -25,13 +25,13 @@ DEFINES += QT_DEPRECATED_WARNINGS
 CONFIG += c++11
 
 SOURCES += \
-        generatehl.cpp \
         main.cpp \
-        mainwindow.cpp
+        mainwindow.cpp \
+    hardware.cpp
 
 HEADERS += \
-        generatehl.h \
-        mainwindow.h
+        mainwindow.h \
+    hardware.h
 
 FORMS += \
         mainwindow.ui

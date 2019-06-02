@@ -1,4 +1,4 @@
-#include "generatehl.h"
+#include "hardware.h"
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include <QFile>
@@ -26,27 +26,10 @@ void MainWindow::on_action_triggered()
 
 void MainWindow::on_configButton_clicked()
 {
-   HardwareList::Generate();
-   /*QString strCommand = "/usr/bin/inxi";
-   QStringList args;
-   args << "-ADGNCM" <<"--usb" << "--color" << "0";
-   QProcess process;
-   process.start(strCommand, args);
-   if( !process.waitForStarted() || !process.waitForFinished() ) {
-           return;
-       }
-
-   QString output;
-   if (process.readAllStandardError().size() != 0) {
-        qDebug() << process.readAllStandardError();
-        qDebug() << "Ошибка";
+   Hardware hardware;
+   if (!HardwareList::get_current(hardware)){
+       return;
    }
 
-   output = process.readAllStandardOutput();
-   QFile hardlist("/home/sunny/Applications/Qt/course_work/resources/hardlist.txt");
-   hardlist.open(QIODevice::WriteOnly);
-   QTextStream hardliststream(&hardlist);
-   hardliststream << output;
-   hardlist.close();*/
-
+   hardware.save();
 }

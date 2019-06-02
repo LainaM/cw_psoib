@@ -1,57 +1,13 @@
-#include "generatehl.h"
+#include "hardware.h"
 #include <QDebug>
 #include <QFile>
 #include <QProcess>
 #include <QRegularExpression>
 #include <QRegularExpressionMatch>
 #include <QDir>
-#include <QJsonDocument>
-#include <QJsonObject>
-#include <QJsonArray>
 
 
-struct Hardware{
-    QString cpu;
-    QStringList gpu;
-    QStringList audio;
-    QStringList network;
-    QStringList drive;
-    QStringList usb;
-
-    QString to_string(){
-        QString text;
-        text = "CPU:\t" + cpu + "\n";
-        text += "GPU:\t" + gpu.join("\n\t") + "\n";
-        text += "AUDIO:\t" + audio.join("\n\t") + "\n";
-        text += "NETWORK:\t" + network.join("\n\t") + "\n";
-        text += "DRIVE:\t" + drive.join("\n\t") + "\n";
-        text += "USB:\t" + usb.join("\n\t");
-
-        return text;
-    }
-    QJsonObject toJson() const {
-        return {
-            {"cpu", cpu},
-            {"gpu", QJsonArray::fromStringList(gpu)},
-            {"audio", QJsonArray::fromStringList(audio)},
-            {"network", QJsonArray::fromStringList(network)},
-            {"drive", QJsonArray::fromStringList(drive)},
-            {"usb", QJsonArray::fromStringList(usb)}
-        };
-    }
-};
-
-bool operator==(const Hardware& lhs, const Hardware& rhs){
-    return lhs.cpu == rhs.cpu &&
-           lhs.gpu == rhs.gpu &&
-           lhs.audio == rhs.audio &&
-           lhs.network == rhs.network &&
-           lhs.drive == rhs.drive &&
-           lhs.usb == rhs.usb;
-}
-
-
-void HardwareList::Generate()
+bool HardwareList::get_current(Hardware &hardware)
 {
     QString strCommand = "/usr/bin/inxi";
     QStringList args;
@@ -59,7 +15,7 @@ void HardwareList::Generate()
     QProcess process;
     process.start(strCommand, args);
     if( !process.waitForStarted() || !process.waitForFinished() ) {
-        return;
+        return false;
     }
 
     QString error = process.readAllStandardError();
@@ -67,12 +23,11 @@ void HardwareList::Generate()
         qDebug() << "Ошибка";
         qDebug() << error;
         qDebug() << process.readAllStandardOutput();
+        return false;
     }
 
     QString output = process.readAllStandardOutput();
 //    qDebug().noquote() << output << "\n\n";
-
-    Hardware hardware;
 
     QRegularExpression reg_cpu("model: (?<cpu>[^>]+) bits");
     QRegularExpressionMatch match_cpu = reg_cpu.match(output);
@@ -128,10 +83,46 @@ void HardwareList::Generate()
 
 
     qDebug().noquote() << hardware.to_string();
+    return true;
+}
 
+QString Hardware::to_string(){
+    QString text;
+    text = "CPU:\t" + cpu + "\n";
+    text += "GPU:\t" + gpu.join("\n\t") + "\n";
+    text += "AUDIO:\t" + audio.join("\n\t") + "\n";
+    text += "NETWORK:\t" + network.join("\n\t") + "\n";
+    text += "DRIVE:\t" + drive.join("\n\t") + "\n";
+    text += "USB:\t" + usb.join("\n\t");
+
+    return text;
+}
+
+QJsonObject Hardware::toJson() const {
+    return {
+        {"cpu", cpu},
+        {"gpu", QJsonArray::fromStringList(gpu)},
+        {"audio", QJsonArray::fromStringList(audio)},
+        {"network", QJsonArray::fromStringList(network)},
+        {"drive", QJsonArray::fromStringList(drive)},
+        {"usb", QJsonArray::fromStringList(usb)}
+    };
+}
+
+void Hardware::save()
+{
     QFile hardlist(QDir::homePath() + "/.hardlist.txt");
     hardlist.open(QIODevice::WriteOnly);
     QTextStream hardliststream(&hardlist);
-    hardliststream << QJsonDocument(hardware.toJson()).toJson();
+    hardliststream << QJsonDocument(this->toJson()).toJson();
     hardlist.close();
+}
+
+bool operator==(const Hardware& lhs, const Hardware& rhs){
+    return lhs.cpu == rhs.cpu &&
+           lhs.gpu == rhs.gpu &&
+           lhs.audio == rhs.audio &&
+           lhs.network == rhs.network &&
+           lhs.drive == rhs.drive &&
+           lhs.usb == rhs.usb;
 }
