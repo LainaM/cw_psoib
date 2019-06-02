@@ -34,15 +34,15 @@ void MainWindow::on_configButton_clicked()
 
    hardware.save();
 
-   QFile hardlist(QDir::homePath() + "/.hardlist.txt");
+   /*QFile hardlist(QDir::homePath() + "/.hardlist.txt");
    if ((hardlist.exists()) && (hardlist.open(QIODevice::ReadOnly))){
        QString str = "";
        while (!hardlist.atEnd()){
            str = str + hardlist.readLine();
        }
 
-       ui->listWidget->addItems(str.split("\n"));
+       ui->listView->set(str.split("\n"));
 
-   }
+   }*/
 
 }
