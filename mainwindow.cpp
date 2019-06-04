@@ -14,6 +14,8 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+    ui->treeWidget->setContextMenuPolicy(Qt::CustomContextMenu);
+    connect(ui->treeWidget, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(slotCustomMenuRequested(QPoint)));
 }
 
 MainWindow::~MainWindow()
@@ -107,3 +109,16 @@ void MainWindow::on_configButton_clicked()
 
 
    }
+
+void MainWindow::on_treeWidget_customContextMenuRequested(const QPoint &pos)
+{
+    QMenu* menu = new QMenu(this);
+    QAction* addBL = new QAction(tr("Добавить в черный список"), this);
+    QAction* addWL = new QAction(tr("Добавить в белый список"), this);
+    connect(addBL, SIGNAL(triggered()), this, SLOT(slotEditRecord()));     // Обработчик вызова диалога редактирования
+    connect(addWL, SIGNAL(triggered()), this, SLOT(slotRemoveRecord())); // Обработчик удаления записи
+    /* Устанавливаем действия в меню */
+    menu->addAction(addBL);
+    menu->addAction(addWL);
+    menu->popup(ui->treeWidget->viewport()->mapToGlobal(pos));
+}

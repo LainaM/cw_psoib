@@ -20,6 +20,8 @@ private slots:
     void on_action_triggered();
     void on_configButton_clicked();
 
+    void on_treeWidget_customContextMenuRequested(const QPoint &pos);
+
 private:
     Ui::MainWindow *ui;
 };

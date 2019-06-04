@@ -20,7 +20,7 @@
    <string>MainWindow</string>
   </property>
   <widget class="QWidget" name="centralWidget">
-   <widget class="QWidget" name="">
+   <widget class="QWidget" name="layoutWidget">
     <property name="geometry">
      <rect>
       <x>10</x>
@@ -32,6 +32,9 @@
     <layout class="QVBoxLayout" name="verticalLayout">
      <item>
       <widget class="QTreeWidget" name="treeWidget">
+       <property name="contextMenuPolicy">
+        <enum>Qt::CustomContextMenu</enum>
+       </property>
        <column>
         <property name="text">
          <string notr="true">1</string>
