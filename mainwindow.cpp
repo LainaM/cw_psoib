@@ -38,6 +38,8 @@ void MainWindow::on_configButton_clicked()
 
    hardware.save();
 
+   ui->treeWidget->clear();
+
    QTreeWidgetItem *cpu_itm = new QTreeWidgetItem();
    cpu_itm->setText(0, "Процессор");
    ui->treeWidget->setColumnCount(1);
