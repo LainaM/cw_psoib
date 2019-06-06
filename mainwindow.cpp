@@ -16,6 +16,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+
     ui->treeWidget->setContextMenuPolicy(Qt::CustomContextMenu);
     connect(ui->treeWidget, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(slotCustomMenuRequested(QPoint)));
 }
@@ -38,6 +39,8 @@ void MainWindow::on_configButton_clicked()
    }
 
    hardware.save();
+
+   ui->treeWidget->clear();
 
    QTreeWidgetItem *cpu_itm = new QTreeWidgetItem();
    cpu_itm->setText(0, "Процессор");
@@ -101,6 +104,13 @@ void MainWindow::on_configButton_clicked()
        child->setText(0, item);
        network_itm->addChild(child);
    }
+
+   ui->treeWidget->expandItem(cpu_itm);
+   ui->treeWidget->expandItem(gpu_itm);
+   ui->treeWidget->expandItem(network_itm);
+   ui->treeWidget->expandItem(audio_itm);
+   ui->treeWidget->expandItem(usb_itm);
+   ui->treeWidget->expandItem(drive_itm);
 
    /*QFile hardlist(QDir::homePath() + "/.hardlist.txt");
    if ((hardlist.exists()) && (hardlist.open(QIODevice::ReadOnly))){
