@@ -21,6 +21,7 @@ struct Hardware{
     void save();
 
     bool operator==(const Hardware& rhs);
+    bool operator!=(const Hardware& rhs);
 };
 
 class HardwareList {

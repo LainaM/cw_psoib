@@ -168,4 +168,6 @@ bool Hardware::operator==(const Hardware& rhs){
            usb == rhs.usb;
 }
 
-
+bool Hardware::operator!=(const Hardware& rhs){
+    return !(*this == rhs);
+}

@@ -14,9 +14,11 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+    ui->pushButton->setVisible(false);
 
     ui->treeWidget->setContextMenuPolicy(Qt::CustomContextMenu);
     connect(ui->treeWidget, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(slotCustomMenuRequested(QPoint)));
+    on_configButton_clicked();
 }
 
 MainWindow::~MainWindow()
@@ -31,12 +33,10 @@ void MainWindow::on_action_triggered()
 
 void MainWindow::on_configButton_clicked()
 {
-   Hardware hardware;
-   if (!HardwareList::get_current(hardware)){
+   Hardware current_hardware;
+   if (!HardwareList::get_current(current_hardware)){
        return;
    }
-
-   hardware.save();
 
    ui->treeWidget->clear();
 
@@ -45,7 +45,7 @@ void MainWindow::on_configButton_clicked()
    ui->treeWidget->setColumnCount(1);
    ui->treeWidget->addTopLevelItem(cpu_itm);
    QTreeWidgetItem *child = new QTreeWidgetItem();
-   child->setText(0, hardware.cpu);
+   child->setText(0, current_hardware.cpu);
    cpu_itm->addChild(child);
 
    QTreeWidgetItem *gpu_itm = new QTreeWidgetItem();
@@ -53,7 +53,7 @@ void MainWindow::on_configButton_clicked()
    ui->treeWidget->setColumnCount(1);
    ui->treeWidget->addTopLevelItem(gpu_itm);
 
-   for (auto const &item : hardware.gpu){
+   for (auto const &item : current_hardware.gpu){
        QTreeWidgetItem *child = new QTreeWidgetItem();
        child->setText(0, item);
        gpu_itm->addChild(child);
@@ -64,7 +64,7 @@ void MainWindow::on_configButton_clicked()
    ui->treeWidget->setColumnCount(1);
    ui->treeWidget->addTopLevelItem(drive_itm);
 
-   for (auto const &item : hardware.drive){
+   for (auto const &item : current_hardware.drive){
        QTreeWidgetItem *child = new QTreeWidgetItem();
        child->setText(0, item);
        drive_itm->addChild(child);
@@ -75,7 +75,7 @@ void MainWindow::on_configButton_clicked()
    ui->treeWidget->setColumnCount(1);
    ui->treeWidget->addTopLevelItem(usb_itm);
 
-   for (auto const &item : hardware.usb){
+   for (auto const &item : current_hardware.usb){
        QTreeWidgetItem *child = new QTreeWidgetItem();
        child->setText(0, item);
        usb_itm->addChild(child);
@@ -86,7 +86,7 @@ void MainWindow::on_configButton_clicked()
    ui->treeWidget->setColumnCount(1);
    ui->treeWidget->addTopLevelItem(audio_itm);
 
-   for (auto const &item : hardware.audio){
+   for (auto const &item : current_hardware.audio){
        QTreeWidgetItem *child = new QTreeWidgetItem();
        child->setText(0, item);
        audio_itm->addChild(child);
@@ -97,7 +97,7 @@ void MainWindow::on_configButton_clicked()
    ui->treeWidget->setColumnCount(1);
    ui->treeWidget->addTopLevelItem(network_itm);
 
-   for (auto const &item : hardware.network){
+   for (auto const &item : current_hardware.network){
        QTreeWidgetItem *child = new QTreeWidgetItem();
        child->setText(0, item);
        network_itm->addChild(child);
@@ -117,7 +117,13 @@ void MainWindow::on_configButton_clicked()
            str = str + hardlist.readLine();
        }*/
 
+   Hardware locked_hardware = HardwareList::load();
 
+   if (current_hardware == locked_hardware) {
+        ui->pushButton->setVisible(false);
+   } else {
+       ui->pushButton->setVisible(true);
+    }
    }
 
 void MainWindow::on_treeWidget_customContextMenuRequested(const QPoint &pos)
@@ -131,4 +137,15 @@ void MainWindow::on_treeWidget_customContextMenuRequested(const QPoint &pos)
     menu->addAction(addBL);
     menu->addAction(addWL);
     menu->popup(ui->treeWidget->viewport()->mapToGlobal(pos));
+}
+
+void MainWindow::on_pushButton_clicked()
+{
+    Hardware hardware;
+    if (!HardwareList::get_current(hardware)){
+        return;
+    }
+
+    hardware.save();
+    on_configButton_clicked();
 }
