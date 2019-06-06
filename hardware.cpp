@@ -150,7 +150,7 @@ Hardware HardwareList::load()
 {
     QFile hardlist(QDir::homePath() + "/.hardlist.txt");
     if (!hardlist.open(QIODevice::ReadOnly | QIODevice::Text)){
-        throw std::runtime_error("Cant open hardlist.txt");
+        return Hardware();
     }
     QTextStream text(&hardlist);
     Hardware hardware = HardwareList::fromJson(text.readAll());

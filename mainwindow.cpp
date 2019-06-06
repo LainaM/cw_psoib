@@ -37,6 +37,7 @@ void MainWindow::on_configButton_clicked()
    if (!HardwareList::get_current(current_hardware)){
        return;
    }
+   Hardware saved_hardware = HardwareList::load();
 
    ui->treeWidget->clear();
 
@@ -45,77 +46,19 @@ void MainWindow::on_configButton_clicked()
    ui->treeWidget->setColumnCount(1);
    ui->treeWidget->addTopLevelItem(cpu_itm);
    QTreeWidgetItem *child = new QTreeWidgetItem();
-   child->setText(0, current_hardware.cpu);
+   QString cpu = current_hardware.cpu;
+   if (current_hardware.cpu != saved_hardware.cpu) {
+       cpu += " (изменен)";
+   }
+    child->setText(0, cpu);
    cpu_itm->addChild(child);
-
-   QTreeWidgetItem *gpu_itm = new QTreeWidgetItem();
-   gpu_itm->setText(0, "Видеоустройства");
-   ui->treeWidget->setColumnCount(1);
-   ui->treeWidget->addTopLevelItem(gpu_itm);
-
-   for (auto const &item : current_hardware.gpu){
-       QTreeWidgetItem *child = new QTreeWidgetItem();
-       child->setText(0, item);
-       gpu_itm->addChild(child);
-   }
-
-   QTreeWidgetItem *drive_itm = new QTreeWidgetItem();
-   drive_itm->setText(0, "Жесткие диски");
-   ui->treeWidget->setColumnCount(1);
-   ui->treeWidget->addTopLevelItem(drive_itm);
-
-   for (auto const &item : current_hardware.drive){
-       QTreeWidgetItem *child = new QTreeWidgetItem();
-       child->setText(0, item);
-       drive_itm->addChild(child);
-   }
-
-   QTreeWidgetItem *usb_itm = new QTreeWidgetItem();
-   usb_itm->setText(0, "Съемные носители");
-   ui->treeWidget->setColumnCount(1);
-   ui->treeWidget->addTopLevelItem(usb_itm);
-
-   for (auto const &item : current_hardware.usb){
-       QTreeWidgetItem *child = new QTreeWidgetItem();
-       child->setText(0, item);
-       usb_itm->addChild(child);
-   }
-
-   QTreeWidgetItem *audio_itm = new QTreeWidgetItem();
-   audio_itm->setText(0, "Аудиоустройства");
-   ui->treeWidget->setColumnCount(1);
-   ui->treeWidget->addTopLevelItem(audio_itm);
-
-   for (auto const &item : current_hardware.audio){
-       QTreeWidgetItem *child = new QTreeWidgetItem();
-       child->setText(0, item);
-       audio_itm->addChild(child);
-   }
-
-   QTreeWidgetItem *network_itm = new QTreeWidgetItem();
-   network_itm->setText(0, "Сетевые устройства");
-   ui->treeWidget->setColumnCount(1);
-   ui->treeWidget->addTopLevelItem(network_itm);
-
-   for (auto const &item : current_hardware.network){
-       QTreeWidgetItem *child = new QTreeWidgetItem();
-       child->setText(0, item);
-       network_itm->addChild(child);
-   }
-
    ui->treeWidget->expandItem(cpu_itm);
-   ui->treeWidget->expandItem(gpu_itm);
-   ui->treeWidget->expandItem(network_itm);
-   ui->treeWidget->expandItem(audio_itm);
-   ui->treeWidget->expandItem(usb_itm);
-   ui->treeWidget->expandItem(drive_itm);
 
-   /*QFile hardlist(QDir::homePath() + "/.hardlist.txt");
-   if ((hardlist.exists()) && (hardlist.open(QIODevice::ReadOnly))){
-       QString str = "";
-       while (!hardlist.atEnd()){
-           str = str + hardlist.readLine();
-       }*/
+   add_elements("Видеоустройства", current_hardware.gpu, saved_hardware.gpu);
+   add_elements("Жесткие диски", current_hardware.drive, saved_hardware.drive);
+   add_elements("Съемные носители", current_hardware.usb, saved_hardware.usb);
+   add_elements("Аудиоустройства", current_hardware.audio, saved_hardware.audio);
+   add_elements("Сетевые устройства", current_hardware.network, saved_hardware.network);
 
    Hardware locked_hardware = HardwareList::load();
 
@@ -148,4 +91,32 @@ void MainWindow::on_pushButton_clicked()
 
     hardware.save();
     on_configButton_clicked();
+}
+
+
+void MainWindow::add_elements(const QString &item_name, const QStringList &current, const QStringList &saved){
+    QTreeWidgetItem *itm = new QTreeWidgetItem();
+    itm->setText(0, item_name);
+    ui->treeWidget->setColumnCount(1);
+    ui->treeWidget->addTopLevelItem(itm);
+
+    for (auto const &item : current){
+        QTreeWidgetItem *child = new QTreeWidgetItem();
+        QString element = item;
+        if (!saved.contains(element)) {
+            element += " (добавлено)";
+        }
+        child->setText(0, element);
+        itm->addChild(child);
+    }
+    for (auto const &item : saved) {
+        QString element = item;
+        if (!current.contains(element)) {
+            QTreeWidgetItem *child = new QTreeWidgetItem();
+            element += " (удалено)";
+            child->setText(0, element);
+            itm->addChild(child);
+        }
+    }
+    ui->treeWidget->expandItem(itm);
 }

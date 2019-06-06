@@ -26,6 +26,7 @@ private slots:
 
 private:
     Ui::MainWindow *ui;
+    void add_elements(const QString &item_name, const QStringList &current, const QStringList &saved);
 };
 
 #endif // MAINWINDOW_H
