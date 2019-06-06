@@ -30,7 +30,7 @@ private slots:
 
 private:
     Ui::MainWindow *ui;
-    void add_elements(const QString &item_name, const QStringList &current, const QStringList &saved);
+    void add_elements(const QString &item_name, const QStringList &current, const QStringList &saved, const QStringList &bl, const QStringList &wl);
 
     const QStringList HARDWARE_ELEMENTS = {"Видеоустройства", "Процессор", "Жесткие диски", "Съемные носители",
                                            "Аудиоустройства", "Сетевые устройства"};
@@ -38,6 +38,8 @@ private:
     void addElementByParent(const QString &parent, const QString &item, Hardware &hardware);
     void delElementByParent(const QString &parent, const QString &item, Hardware &hardware);
     bool inHardware(const QString &parent, const QString &item, Hardware &hardware);
+    QString cleanItem(QString item);
+
     QPoint possion;
 };
 

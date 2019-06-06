@@ -38,19 +38,19 @@ void MainWindow::on_configButton_clicked()
        return;
    }
    Hardware saved_hardware = HardwareList::load_saved();
+   Hardware black_list = HardwareList::load_black_list();
+   Hardware white_list = HardwareList::load_white_list();
 
    ui->treeWidget->clear();
 
-   add_elements("Процессор", current_hardware.cpu, saved_hardware.cpu);
-   add_elements("Видеоустройства", current_hardware.gpu, saved_hardware.gpu);
-   add_elements("Жесткие диски", current_hardware.drive, saved_hardware.drive);
-   add_elements("Съемные носители", current_hardware.usb, saved_hardware.usb);
-   add_elements("Аудиоустройства", current_hardware.audio, saved_hardware.audio);
-   add_elements("Сетевые устройства", current_hardware.network, saved_hardware.network);
+   add_elements("Процессор", current_hardware.cpu, saved_hardware.cpu, black_list.cpu, white_list.cpu);
+   add_elements("Видеоустройства", current_hardware.gpu, saved_hardware.gpu, black_list.gpu, white_list.gpu);
+   add_elements("Жесткие диски", current_hardware.drive, saved_hardware.drive, black_list.drive, white_list.drive);
+   add_elements("Съемные носители", current_hardware.usb, saved_hardware.usb, black_list.usb, white_list.usb);
+   add_elements("Аудиоустройства", current_hardware.audio, saved_hardware.audio, black_list.audio, white_list.audio);
+   add_elements("Сетевые устройства", current_hardware.network, saved_hardware.network, black_list.network, white_list.network);
 
-   Hardware locked_hardware = HardwareList::load_saved();
-
-   if (current_hardware == locked_hardware) {
+   if (current_hardware == saved_hardware) {
         ui->pushButton->setVisible(false);
    } else {
        ui->pushButton->setVisible(true);
@@ -119,7 +119,7 @@ void MainWindow::on_treeWidget_customContextMenuRequested(const QPoint &pos)
 {
     possion = pos;
     QTreeWidgetItem* item = ui->treeWidget->itemAt(pos);
-    QString item_name = item->text(0).trimmed();
+    QString item_name = cleanItem(item->text(0).trimmed());
     if (HARDWARE_ELEMENTS.contains( item_name )) {
         return;
     }
@@ -166,40 +166,43 @@ void MainWindow::on_pushButton_clicked()
 
 void MainWindow::addElementByParent(const QString &parent, const QString &item, Hardware &hardware)
 {
+    QString clened_item = cleanItem(item);
     if (parent == "Процессор") {
-        hardware.cpu.append(item);
+        hardware.cpu.append(clened_item);
     } else if (parent == "Видеоустройства") {
-        hardware.gpu.append(item);
+        hardware.gpu.append(clened_item);
     } else if (parent == "Аудиоустройства") {
-        hardware.audio.append(item);
+        hardware.audio.append(clened_item);
     } else if (parent == "Жесткие диски") {
-        hardware.drive.append(item);
+        hardware.drive.append(clened_item);
     } else if (parent == "Съемные носители") {
-        hardware.usb.append(item);
+        hardware.usb.append(clened_item);
     } else if (parent == "Сетевые устройства") {
-        hardware.network.append(item);
+        hardware.network.append(clened_item);
     }
 }
 
 void MainWindow::delElementByParent(const QString &parent, const QString &item, Hardware &hardware)
 {
+    QString clened_item = cleanItem(item);
     if (parent == "Процессор") {
-        hardware.cpu.removeAll(item);
+        hardware.cpu.removeAll(clened_item);
     } else if (parent == "Видеоустройства") {
-        hardware.gpu.removeAll(item);
+        hardware.gpu.removeAll(clened_item);
     } else if (parent == "Аудиоустройства") {
-        hardware.audio.removeAll(item);
+        hardware.audio.removeAll(clened_item);
     } else if (parent == "Жесткие диски") {
-        hardware.drive.removeAll(item);
+        hardware.drive.removeAll(clened_item);
     } else if (parent == "Съемные носители") {
-        hardware.usb.removeAll(item);
+        hardware.usb.removeAll(clened_item);
     } else if (parent == "Сетевые устройства") {
-        hardware.network.removeAll(item);
+        hardware.network.removeAll(clened_item);
     }
 }
 
 bool MainWindow::inHardware(const QString &parent, const QString &item, Hardware &hardware)
 {
+    QString clened_item = cleanItem(item);
     if (parent == "Процессор") {
         return hardware.cpu.contains(item);
     } else if (parent == "Видеоустройства") {
@@ -216,8 +219,17 @@ bool MainWindow::inHardware(const QString &parent, const QString &item, Hardware
     throw std::runtime_error("WRONG");
 }
 
+QString MainWindow::cleanItem(QString item)
+{
+    item = item.replace(" (добавлено)", "");
+    item = item.replace(" в черном списке", "");
+    item = item.replace(" не в белом списке", "");
+    item = item.replace(" (удалено)", "");
+    return item.trimmed();
+}
 
-void MainWindow::add_elements(const QString &item_name, const QStringList &current, const QStringList &saved){
+
+void MainWindow::add_elements(const QString &item_name, const QStringList &current, const QStringList &saved, const QStringList &bl, const QStringList &wl){
     QTreeWidgetItem *itm = new QTreeWidgetItem();
     itm->setText(0, item_name);
     ui->treeWidget->setColumnCount(1);
@@ -225,9 +237,15 @@ void MainWindow::add_elements(const QString &item_name, const QStringList &curre
 
     for (auto const &item : current){
         QTreeWidgetItem *child = new QTreeWidgetItem();
-        QString element = item;
-        if (!saved.contains(element)) {
+        QString element = item.trimmed();
+        if (!saved.contains(item)) {
             element += " (добавлено)";
+        }
+        if (bl.contains(item.trimmed())) {
+            element += " в черном списке";
+        }
+        if (!wl.isEmpty() && !wl.contains(item.trimmed())) {
+            element += " не в белом списке";
         }
         child->setText(0, element);
         itm->addChild(child);
