@@ -31,11 +31,20 @@ bool HardwareList::get_current(Hardware &hardware)
     QString output = process.readAllStandardOutput();
 //    qDebug().noquote() << output << "\n\n";
 
-    QRegularExpression reg_cpu("model: (?<cpu>[^>]+) bits");
+    /*QRegularExpression reg_cpu("model: (?<cpu>[^>]+) bits");
     QRegularExpressionMatch match_cpu = reg_cpu.match(output);
     if (match_cpu.hasMatch()) {
         hardware.cpu = match_cpu.captured("cpu");
-    }
+    }*/
+
+    QStringRef cpu_text = output.midRef(output.indexOf("CPU:"));
+    cpu_text = cpu_text.left(cpu_text.indexOf("Graphics:"));
+    while (!cpu_text.isEmpty() && cpu_text.contains("model")){
+        QStringRef device = cpu_text.mid(cpu_text.indexOf("model:") + 6);
+        cpu_text = device.mid(device.indexOf(" \n") + 1);
+        device = device.left(device.indexOf("bits:"));
+        hardware.cpu.append(device.toString());
+     }
 
     QStringRef gpu_text = output.midRef(output.indexOf("Graphics:"));
     gpu_text = gpu_text.left(gpu_text.indexOf("Audio:"));
