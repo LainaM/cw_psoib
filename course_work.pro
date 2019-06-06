@@ -25,16 +25,22 @@ DEFINES += QT_DEPRECATED_WARNINGS
 CONFIG += c++11
 
 SOURCES += \
+    blacklist.cpp \
         main.cpp \
         mainwindow.cpp \
-    hardware.cpp
+    hardware.cpp \
+    whitelist.cpp
 
 HEADERS += \
+    blacklist.h \
         mainwindow.h \
-    hardware.h
+    hardware.h \
+    whitelist.h
 
 FORMS += \
-        mainwindow.ui
+        blacklist.ui \
+        mainwindow.ui \
+        whitelist.ui
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

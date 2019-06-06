@@ -8,6 +8,8 @@
 #include <QProcess>
 #include <QDebug>
 #include <QStringListModel>
+#include "blacklist.h"
+#include "whitelist.h"
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -115,10 +117,24 @@ void MainWindow::on_treeWidget_customContextMenuRequested(const QPoint &pos)
     QMenu* menu = new QMenu(this);
     QAction* addBL = new QAction(tr("Добавить в черный список"), this);
     QAction* addWL = new QAction(tr("Добавить в белый список"), this);
-    connect(addBL, SIGNAL(triggered()), this, SLOT(slotEditRecord()));     // Обработчик вызова диалога редактирования
-    connect(addWL, SIGNAL(triggered()), this, SLOT(slotRemoveRecord())); // Обработчик удаления записи
-    /* Устанавливаем действия в меню */
+    connect(addBL, SIGNAL(triggered()), this, SLOT(slotAddBL()));
+    connect(addWL, SIGNAL(triggered()), this, SLOT(slotAddWL()));
     menu->addAction(addBL);
     menu->addAction(addWL);
     menu->popup(ui->treeWidget->viewport()->mapToGlobal(pos));
+}
+
+
+void MainWindow::on_action_2_triggered()
+{
+    WhiteList whitelist;
+    whitelist.setModal(true);
+    whitelist.exec();
+}
+
+void MainWindow::on_action_3_triggered()
+{
+    BlackList blacklist;
+    blacklist.setModal(true);
+    blacklist.exec();
 }
