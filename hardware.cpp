@@ -29,13 +29,6 @@ bool HardwareList::get_current(Hardware &hardware)
     }
 
     QString output = process.readAllStandardOutput();
-//    qDebug().noquote() << output << "\n\n";
-
-    /*QRegularExpression reg_cpu("model: (?<cpu>[^>]+) bits");
-    QRegularExpressionMatch match_cpu = reg_cpu.match(output);
-    if (match_cpu.hasMatch()) {
-        hardware.cpu = match_cpu.captured("cpu");
-    }*/
 
     QStringRef cpu_text = output.midRef(output.indexOf("CPU:"));
     cpu_text = cpu_text.left(cpu_text.indexOf("Graphics:"));
@@ -99,7 +92,7 @@ bool HardwareList::get_current(Hardware &hardware)
 
 QString Hardware::to_string(){
     QString text;
-    text = "CPU:\t" + cpu + "\n";
+    text = "CPU:\t" + cpu.join("\n\t") + "\n";
     text += "GPU:\t" + gpu.join("\n\t") + "\n";
     text += "AUDIO:\t" + audio.join("\n\t") + "\n";
     text += "NETWORK:\t" + network.join("\n\t") + "\n";
@@ -111,7 +104,7 @@ QString Hardware::to_string(){
 
 QJsonObject Hardware::toJson() const {
     return {
-        {"cpu", cpu},
+        {"cpu", QJsonArray::fromStringList(cpu)},
         {"gpu", QJsonArray::fromStringList(gpu)},
         {"audio", QJsonArray::fromStringList(audio)},
         {"network", QJsonArray::fromStringList(network)},
@@ -120,10 +113,17 @@ QJsonObject Hardware::toJson() const {
     };
 }
 
+bool Hardware::isEmpty() const
+{
+    return cpu.isEmpty() && gpu.isEmpty() && audio.isEmpty() && network.isEmpty() && drive.isEmpty() && usb.isEmpty();
+}
+
 Hardware HardwareList::fromJson(const QString &text) {
     QJsonObject json = QJsonDocument::fromJson(text.toUtf8()).object();
     Hardware hardware;
-    hardware.cpu = json["cpu"].toString();
+    for (auto item: json["cpu"].toArray()){
+        hardware.cpu.append(item.toString());
+    }
     for (auto item: json["audio"].toArray()){
         hardware.audio.append(item.toString());
     }
@@ -154,10 +154,56 @@ void Hardware::save()
     hardlist.close();
 }
 
+void Hardware::save_as_black()
+{
+    QFile hardlist(QDir::homePath() + "/.black_list.txt");
+    if(!hardlist.open(QIODevice::WriteOnly)){
+        throw std::runtime_error("Cant save in hardlist.txt");
+    }
+    QTextStream hardliststream(&hardlist);
+    hardliststream << QJsonDocument(this->toJson()).toJson();
+    hardlist.close();
+}
 
-Hardware HardwareList::load()
+void Hardware::save_as_white()
+{
+    QFile hardlist(QDir::homePath() + "/.white_list.txt");
+    if(!hardlist.open(QIODevice::WriteOnly)){
+        throw std::runtime_error("Cant save in hardlist.txt");
+    }
+    QTextStream hardliststream(&hardlist);
+    hardliststream << QJsonDocument(this->toJson()).toJson();
+    hardlist.close();
+}
+
+
+Hardware HardwareList::load_saved()
 {
     QFile hardlist(QDir::homePath() + "/.hardlist.txt");
+    if (!hardlist.open(QIODevice::ReadOnly | QIODevice::Text)){
+        return Hardware();
+    }
+    QTextStream text(&hardlist);
+    Hardware hardware = HardwareList::fromJson(text.readAll());
+    hardlist.close();
+    return hardware;
+}
+
+Hardware HardwareList::load_black_list()
+{
+    QFile hardlist(QDir::homePath() + "/.black_list.txt");
+    if (!hardlist.open(QIODevice::ReadOnly | QIODevice::Text)){
+        return Hardware();
+    }
+    QTextStream text(&hardlist);
+    Hardware hardware = HardwareList::fromJson(text.readAll());
+    hardlist.close();
+    return hardware;
+}
+
+Hardware HardwareList::load_white_list()
+{
+    QFile hardlist(QDir::homePath() + "/.white_list.txt");
     if (!hardlist.open(QIODevice::ReadOnly | QIODevice::Text)){
         return Hardware();
     }
