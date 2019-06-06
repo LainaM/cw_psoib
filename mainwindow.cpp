@@ -105,6 +105,7 @@ void MainWindow::add_elements(const QString &item_name, const QStringList &curre
         QString element = item;
         if (!saved.contains(element)) {
             element += " (добавлено)";
+            child->setTextColor(0, QColor(0,0,128,255));
         }
         child->setText(0, element);
         itm->addChild(child);
@@ -115,6 +116,7 @@ void MainWindow::add_elements(const QString &item_name, const QStringList &curre
             QTreeWidgetItem *child = new QTreeWidgetItem();
             element += " (удалено)";
             child->setText(0, element);
+            child->setTextColor(0, QColor(200,0,100,255));
             itm->addChild(child);
         }
     }
