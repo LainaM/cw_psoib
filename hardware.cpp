@@ -36,7 +36,7 @@ bool HardwareList::get_current(Hardware &hardware)
         QStringRef device = cpu_text.mid(cpu_text.indexOf("model:") + 6);
         cpu_text = device.mid(device.indexOf(" \n") + 1);
         device = device.left(device.indexOf("bits:"));
-        hardware.cpu.append(device.toString());
+        hardware.cpu.append(device.toString().trimmed());
      }
 
     QStringRef gpu_text = output.midRef(output.indexOf("Graphics:"));
@@ -45,7 +45,7 @@ bool HardwareList::get_current(Hardware &hardware)
         QStringRef device = gpu_text.mid(gpu_text.indexOf("Device-") + 10);
         gpu_text = device.mid(device.indexOf(" \n") + 1);
         device = device.left(device.indexOf("driver:"));
-        hardware.gpu.append(device.toString());
+        hardware.gpu.append(device.toString().trimmed());
      }
 
     QStringRef audio_text = output.midRef(output.indexOf("Audio:"));
@@ -54,7 +54,7 @@ bool HardwareList::get_current(Hardware &hardware)
         QStringRef device = audio_text.mid(audio_text.indexOf("Device-") + 10);
         audio_text = device.mid(device.indexOf(" \n") + 1);
         device = device.left(device.indexOf("driver:"));
-        hardware.audio.append(device.toString());
+        hardware.audio.append(device.toString().trimmed());
     }
 
     QStringRef network_text = output.midRef(output.indexOf("Network:"));
@@ -63,7 +63,7 @@ bool HardwareList::get_current(Hardware &hardware)
         QStringRef device = network_text.mid(network_text.indexOf("Device-") + 10);
         network_text = device.mid(device.indexOf(" \n") + 1);
         device = device.left(device.indexOf("driver:"));
-        hardware.network.append(device.toString());
+        hardware.network.append(device.toString().trimmed());
     }
 
     QStringRef drive_text = output.midRef(output.indexOf("Drives:"));
@@ -73,7 +73,7 @@ bool HardwareList::get_current(Hardware &hardware)
         drive_text = device.mid(device.indexOf(" \n") + 1);
         device = device.mid(device.indexOf("vendor: ") + 8);
         device = device.left(device.indexOf("size:"));
-        hardware.drive.append(device.toString().replace(" model:", ""));
+        hardware.drive.append(device.toString().replace(" model:", "").trimmed());
     }
 
     QStringRef usb_text = output.midRef(output.indexOf("USB:"));
@@ -82,7 +82,7 @@ bool HardwareList::get_current(Hardware &hardware)
         usb_text = device.mid(device.indexOf(" \n") + 1);
         device = device.mid(device.indexOf("info: ") + 6);
         device = device.left(device.indexOf("type:"));
-        hardware.usb.append(device.toString());
+        hardware.usb.append(device.toString().trimmed());
     }
 
 
